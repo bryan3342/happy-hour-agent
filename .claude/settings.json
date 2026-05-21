@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:eater.com)",
+      "WebFetch(domain:timeout.com)",
+      "WebFetch(domain:thrillist.com)",
+      "WebFetch(domain:theinfatuation.com)",
+      "WebFetch(domain:secretnyc.co)",
+      "WebFetch(domain:greenpointers.com)",
+      "WebFetch(domain:bedfordandbowery.com)",
+      "WebFetch(domain:bushwickdaily.com)",
+      "WebFetch(domain:brokelyn.com)",
+      "WebFetch(domain:reddit.com)",
+      "WebFetch(domain:old.reddit.com)",
+      "WebFetch(domain:google.com)",
+      "WebFetch(domain:maps.google.com)",
+      "WebFetch(domain:yelp.com)",
+      "Read",
+      "Grep",
+      "Glob",
+      "Skill(find-happy-hours *)",
+      "Skill(deal-ranking)",
+      "Skill(nyc-bar-knowledge)",
+      "Skill(result-formatter)"
+    ],
+    "deny": [
+      "Bash(rm *)",
+      "Bash(curl *)"
+    ]
+  }
+}
