@@ -120,22 +120,81 @@ All data is fetched live per request — there is no stored database, no MCP ser
 
 Subagents inherit no write tools — they cannot modify the project.
 
-## 11. Success metrics
+## 11. Token Mitigation & Fetch Boundaries
+
+These rules govern every fetch and every inter-agent handoff. They are enforced operationally in `.claude/agents/happy-hour-scout.md` (fetch-time) and `.claude/skills/find-happy-hours/SKILL.md` (handoff-time).
+
+- **Content Filtering:** Do not read raw HTML. Use scrapers or markdown converters to extract text content only.
+- **Payload Truncation:** If a target webpage contains more than 8,000 tokens of text, extract only the text surrounding headers like "Menu", "Happy Hour", "Specials", or "Drinks".
+- **Reddit/Social Strategy:** When parsing Reddit threads, fetch only the top-level comments or summary text. Do not fetch deep comment reply chains.
+- **Batching:** Never pass more than 3 raw website dumps to the `deal-evaluator` at once. Summarize the deal into a structured JSON or bulleted fragment *before* passing it forward.
+
+## 12. Success metrics
 
 - **Coverage**: ≥ 5 ranked candidates returned for any in-scope neighborhood query.
 - **Freshness**: ≥ 80% of returned deals confirmable against the venue's own site at time of response.
 - **Format compliance**: 100% of responses include the required four-column table.
 - **Geographic accuracy**: 0 results outside the supported geography.
 
-## 12. Out of scope (v1)
+## 13. Out of scope (v1)
 
 - Caching past results.
 - Push notifications when a new deal appears.
 - A web UI — the agent runs inside Claude Code only.
 - Multi-language output.
 
-## 13. Open questions
+## 14. Open questions
 
 - Should the agent prefer venues with confirmable deals on official sites over aggregator-only listings? (Default: yes, by adding a freshness penalty to `deal_quality`.)
 - How should the agent handle deals that vary by day? (Default: filter to the requested day; if no day given, surface the deal valid *now*.)
 - Should non-alcoholic happy hours (coffee, NA cocktails) be included? (Default: yes when the user's query doesn't specify alcohol.)
+
+## 15. Bottomless Brunch Pipeline (v1.1)
+
+A parallel flow for finding bottomless brunch deals. Same geography, same table shape, separate rubric and subagents.
+
+### Files
+
+```
+.claude/
+├── agents/
+│   ├── brunch-scout.md             # gathers candidate restaurants + raw brunch data
+│   └── brunch-evaluator.md         # applies the brunch scoring rubric
+└── skills/
+    ├── find-bottomless-brunch/SKILL.md   # /find-bottomless-brunch entry point
+    └── brunch-ranking/SKILL.md           # brunch scoring rubric (reference)
+```
+
+### Reused assets
+
+- `location-curator` — geography validation is identical for both pipelines.
+- `result-formatter` — 4-column table shape works for brunch (column headers shift to `Restaurant | Location | Brunch Time Frame | Highlighted Deal`).
+- `nyc-bar-knowledge` — shared neighborhood/ZIP reference.
+
+### Ranking rubric
+
+| Axis | Weight | What it measures |
+| :--- | :----- | :--------------- |
+| **Price** | 0.50 | Per-person cost of the bottomless package. |
+| **Inclusion** | 0.35 | Average of drinks variety, food coverage, and duration (each 0–10). |
+| **Quality** | 0.15 | Source confidence, day flexibility, reservation friction, hidden fees. |
+
+Composite = `0.50 * price + 0.35 * inclusion + 0.15 * quality`.
+
+Tiebreakers: (1) wider drinks variety, (2) longer duration, (3) lower price.
+
+### Day scope
+
+Default is **Saturday + Sunday**. Weekday brunches are included only if encountered in the same source — bottomless deals are nearly always weekend-only in practice.
+
+### Drop rule (brunch-specific)
+
+A "$45 brunch with two mimosas" is **not** bottomless. Drop it. The evaluator excludes any deal with a counted drink limit.
+
+### Pipeline
+
+1. **Intake** — `/find-bottomless-brunch` parses neighborhood, day (default both), preferences.
+2. **Scout** — `brunch-scout` subagent uses `WebSearch` and `WebFetch` to pull current brunch data from venue sites and aggregator lists.
+3. **Curate** — `location-curator` (shared) verifies addresses fall inside the supported geography.
+4. **Evaluate** — `brunch-evaluator` applies the brunch-ranking rubric.
+5. **Format** — `result-formatter` (shared) renders the final Markdown table.

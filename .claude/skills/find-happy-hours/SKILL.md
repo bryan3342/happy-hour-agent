@@ -50,6 +50,7 @@ ARGUMENTS: $ARGUMENTS
 - **Always include the freshness date.** Web-sourced deals go stale fast.
 - **Don't show the JSON.** The user sees only the final Markdown table + the one-line ranking note.
 - **One table per response.** If the user asked about multiple neighborhoods, include them all in one table with the neighborhood named in the Location column.
+- **Batching discipline.** Never pass more than 3 raw website dumps to `deal-evaluator` at once. The scout's structured JSON is the only handoff format — if you ever have raw page text, summarize it into JSON or a bulleted fragment first.
 
 ## Reference material
 

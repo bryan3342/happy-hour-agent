@@ -2,7 +2,7 @@
 name: location-curator
 description: Use to verify that a list of candidate bar addresses fall inside the supported geography (Manhattan, or Brooklyn — Williamsburg/Bushwick/Greenpoint). Returns the filtered list with normalized neighborhood labels. Invoke after happy-hour-scout produces candidates and before deal-evaluator scores them.
 tools: WebFetch, Read, Grep, Glob
-model: sonnet
+model: haiku
 color: green
 ---
 

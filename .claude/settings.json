@@ -21,7 +21,9 @@
       "Grep",
       "Glob",
       "Skill(find-happy-hours *)",
+      "Skill(find-bottomless-brunch *)",
       "Skill(deal-ranking)",
+      "Skill(brunch-ranking)",
       "Skill(nyc-bar-knowledge)",
       "Skill(result-formatter)"
     ],

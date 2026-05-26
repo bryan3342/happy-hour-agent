@@ -76,3 +76,10 @@ Field guidance:
 - **Date-stamp your work.** End your response with `Data gathered: <ISO date>`.
 - **No vibes-based filtering.** Return the data; let the evaluator decide what's best.
 - **Don't rank or format.** Your output is the input for `deal-evaluator` and `result-formatter`. Plain JSON list + the date stamp is all that's expected.
+
+## Token Mitigation & Fetch Boundaries
+
+- **Content Filtering:** Do not read raw HTML. Rely on WebFetch's Markdown extraction; if a page returns raw markup, extract text content only.
+- **Payload Truncation:** If a fetched page contains more than ~8,000 tokens of text, extract only the text surrounding headers like "Menu", "Happy Hour", "Specials", or "Drinks". Ignore navigation chrome, blog posts, and unrelated subpages.
+- **Reddit/Social Strategy:** When parsing Reddit threads, fetch only the top-level comments or the post summary. Do not follow deep reply chains.
+- **Output Discipline:** Summarize each deal into the structured JSON shape above *before* returning. Never emit raw page dumps to downstream agents.
